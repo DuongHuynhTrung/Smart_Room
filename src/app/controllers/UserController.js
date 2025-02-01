@@ -88,9 +88,9 @@ const updateUsers = asyncHandler(async (req, res, next) => {
       throw new Error("You don't have permission to update user's profile");
     }
 
-    const { name, avatar_url, dob, country, gender } = req.body;
+    const { fullname, avatar_url, dob, country, gender } = req.body;
     const updateFields = {
-      name: name !== undefined ? name : user.name,
+      fullname: fullname !== undefined ? fullname : user.fullname,
       avatar_url: avatar_url !== undefined ? avatar_url : user.avatar_url,
       dob: dob !== undefined ? dob : user.dob,
       country: country !== undefined ? country : user.country,

@@ -36,6 +36,10 @@ const loginLimiter = require("../app/middleware/loginLimiter");
  *                 format: email
  *               password:
  *                 type: string
+ *               fullname:
+ *                 type: string
+ *               phone_number:
+ *                 type: string
  *     responses:
  *       200:
  *         description: User registered successfully

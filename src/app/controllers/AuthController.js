@@ -10,7 +10,7 @@ const { jwtDecode } = require("jwt-decode");
 //@access public
 const registerUser = asyncHandler(async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, fullname, phone_number } = req.body;
     if (email === undefined || password === undefined) {
       res.status(400);
       throw new Error("All field not be empty!");
@@ -26,6 +26,8 @@ const registerUser = asyncHandler(async (req, res, next) => {
     const user = await User.create({
       email,
       password: hashedPassword,
+      fullname,
+      phone_number,
       role: RoleEnum.CUSTOMER,
     });
 
@@ -36,7 +38,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
     const accessToken = jwt.sign(
       {
         user: {
-          name: user.name,
+          fullname: user.fullname,
           email: user.email,
           roleName: user.role,
           avatar_url: user.avatar_url,
@@ -50,7 +52,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
     const refreshToken = jwt.sign(
       {
         user: {
-          name: user.name,
+          fullname: user.fullname,
           email: user.email,
           roleName: user.role,
           avatar_url: user.avatar_url,
@@ -91,7 +93,7 @@ const loginGoogle = asyncHandler(async (req, res) => {
       const accessToken = jwt.sign(
         {
           user: {
-            fullName: user.name,
+            fullname: user.fullname,
             email: user.email,
             roleName: user.role,
             avatar_url: user.avatar_url,
@@ -106,18 +108,9 @@ const loginGoogle = asyncHandler(async (req, res) => {
     } else {
       const newUser = await User.create({
         email: googlePayload.email,
-        name: googlePayload.name,
+        fullname: googlePayload.name,
         avatar_url: googlePayload.picture,
         role: RoleEnum.CUSTOMER,
-      });
-      await Cart.create({
-        list_cart_item_id: [],
-        user_id: newUser._id,
-        total_price: 0,
-      });
-      await Gallery.create({
-        list_collection_id: [],
-        user_id: newUser._id,
       });
       if (!newUser) {
         res.status(500);
@@ -129,7 +122,7 @@ const loginGoogle = asyncHandler(async (req, res) => {
       const accessToken = jwt.sign(
         {
           user: {
-            name: newUser.name,
+            fullname: newUser.fullname,
             email: newUser.email,
             roleName: newUser.role,
             avatar_url: newUser.avatar_url,
@@ -175,7 +168,7 @@ const login = asyncHandler(async (req, res, next) => {
       const accessToken = jwt.sign(
         {
           user: {
-            fullName: user.name,
+            fullname: user.fullname,
             email: user.email,
             roleName: user.role,
             avatar_url: user.avatar_url,
@@ -189,7 +182,7 @@ const login = asyncHandler(async (req, res, next) => {
       const refreshToken = jwt.sign(
         {
           user: {
-            fullName: user.name,
+            fullname: user.fullname,
             email: user.email,
             roleName: user.role,
             avatar_url: user.avatar_url,

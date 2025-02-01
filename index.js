@@ -5,6 +5,8 @@ const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv").config({ path: "./config.env" });
 const path = require("path");
 const errorHandler = require("./src/app/middleware/errorHandler");
+const swaggerJSDoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -63,6 +65,50 @@ app.use("/api/notifications", notificationRouter);
 
 // Xử lý lỗi
 app.use(errorHandler);
+
+// Cấu hình Swagger
+const swaggerDefinition = {
+  openapi: "3.0.0",
+  info: {
+    title: "Smart Room API Documentation",
+    version: "1.0.0",
+    description: "API documentation for managing Smart Rooms",
+  },
+  servers: [
+    {
+      url: "http://localhost:5000",
+      description: "Development server",
+    },
+    {
+      url: "https://smart-room-mije.onrender.com",
+      description: "Production server",
+    },
+  ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: "http",
+        scheme: "bearer",
+        bearerFormat: "JWT",
+      },
+    },
+  },
+  security: [
+    {
+      bearerAuth: [],
+    },
+  ],
+};
+
+const options = {
+  swaggerDefinition,
+  apis: [
+    "./src/routes/*.js", // Chỉ cần định nghĩa một lần để load tất cả route
+  ],
+};
+
+const swaggerSpec = swaggerJSDoc(options);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Khởi động server
 httpServer.listen(PORT, () => {

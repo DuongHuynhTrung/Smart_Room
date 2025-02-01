@@ -3,7 +3,7 @@ const UserRankEnum = require("../../enum/UserRankEnum");
 
 const userSchema = mongoose.Schema(
   {
-    name: {
+    fullname: {
       type: String,
       maxLength: 255,
     },

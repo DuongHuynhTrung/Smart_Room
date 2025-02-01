@@ -15,8 +15,6 @@ const {
   banAccountByAdmin,
   unBanAccountByAdmin,
   deleteUsersNoAuth,
-  getNewPremium,
-  changeNewPremiumToFalse,
   updateUserInfoForAdmin,
 } = require("../app/controllers/UserController");
 const {
@@ -41,7 +39,7 @@ const {
  *         - email
  *         - password
  *       properties:
- *         name:
+ *         fullname:
  *           type: string
  *           maxLength: 255
  *           description: "User's full name"
@@ -137,7 +135,7 @@ userRouter.use(validateToken);
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               fullname:
  *                 type: string
  *                 maxLength: 255
  *                 description: "User's full name"
@@ -201,7 +199,7 @@ userRouter.route("/admin/:id").put(validateTokenAdmin, updateUserInfoForAdmin);
  *           schema:
  *             type: object
  *             properties:
- *               name:
+ *               fullname:
  *                 type: string
  *                 maxLength: 255
  *                 description: "User's full name"
