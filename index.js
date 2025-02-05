@@ -58,8 +58,8 @@ const notificationRouter = require("./src/routes/NotificationRouter");
 const vnPayRouter = require("./src/routes/VNPayRouter");
 const historyRouter = require("./src/routes/HistoryRouter");
 const transactionRouter = require("./src/routes/TransactionRouter");
-const payOsRouter = require("./src/routes/payOsRouter");
 const roomRouter = require("./src/routes/roomRouter");
+const payOsRouter = require("./src/routes/payOsRouter");
 
 app.use(express.static(path.resolve(__dirname, "public")));
 
