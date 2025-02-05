@@ -1,12 +1,11 @@
 const NotificationTypeEnum = {
-  NEW_PLANT: "new_plant",
-  NEW_PLANTER: "new_planter",
-  NEW_SEED: "new_seed",
-  PURCHASING_ORDER: "purchasing_order",
-  SHIPPED: "shipped",
-  OUT_OF_DELIVERY: "out_for_delivery",
-  DELIVERED: "delivered",
-  NEW_VOUCHER: "new_voucher",
+  CENSOR_ROOM_POSTED: "CENSOR_ROOM_POSTED",
+  NEW_TRANSACTION: "NEW_TRANSACTION",
+  CENSORSHIP_SUCCESSFUL: "CENSORSHIP_SUCCESSFUL",
+  CENSORSHIP_FAILED: "CENSORSHIP_FAILED",
+  UP_MEMBERSHIP: "UP_MEMBERSHIP",
+  PAYMENT_SUCCESSFUL: "PAYMENT_SUCCESSFUL",
+  PAYMENT_FAILED: "PAYMENT_FAILED",
 };
 
 module.exports = NotificationTypeEnum;

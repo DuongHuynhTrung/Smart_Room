@@ -55,6 +55,11 @@ db.connect();
 const userRouter = require("./src/routes/UserRouter");
 const authRouter = require("./src/routes/AuthRouter");
 const notificationRouter = require("./src/routes/NotificationRouter");
+const vnPayRouter = require("./src/routes/VNPayRouter");
+const historyRouter = require("./src/routes/HistoryRouter");
+const transactionRouter = require("./src/routes/TransactionRouter");
+const payOsRouter = require("./src/routes/payOsRouter");
+const roomRouter = require("./src/routes/roomRouter");
 
 app.use(express.static(path.resolve(__dirname, "public")));
 
@@ -62,6 +67,11 @@ app.use(express.static(path.resolve(__dirname, "public")));
 app.use("/api/users", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/notifications", notificationRouter);
+app.use("/api/vnPays", vnPayRouter);
+app.use("/api/histories", historyRouter);
+app.use("/api/payOs", payOsRouter);
+app.use("/api/rooms", roomRouter);
+app.use("/api/transactions", transactionRouter);
 
 // Xử lý lỗi
 app.use(errorHandler);

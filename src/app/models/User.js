@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const UserRankEnum = require("../../enum/UserRankEnum");
+const UserMembershipEnum = require("../../enum/UserMembershipEnum");
 
 const userSchema = mongoose.Schema(
   {
@@ -18,9 +18,6 @@ const userSchema = mongoose.Schema(
       type: String,
       maxLength: 10,
     },
-    country: {
-      type: String,
-    },
     gender: {
       type: String,
     },
@@ -30,9 +27,13 @@ const userSchema = mongoose.Schema(
     avatar_url: {
       type: String,
     },
-    rank: {
+    membership: {
       type: String,
-      default: UserRankEnum.NORMAL,
+      default: UserMembershipEnum.NORMAL,
+    },
+    account_balance: {
+      type: Number,
+      default: 0,
     },
     role: {
       type: String,
@@ -40,6 +41,12 @@ const userSchema = mongoose.Schema(
     status: {
       type: Boolean,
       default: true,
+    },
+    otp: {
+      type: Number,
+    },
+    otpExpired: {
+      type: Date,
     },
   },
   {

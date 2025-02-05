@@ -1,6 +1,6 @@
 const PaymentMethodEnum = {
-  VNPAY: "VNPay",
-  PayOS: "PayOS",
+  VNPAY: "vnpay",
+  PayOS: "internet_banking",
 };
 
 module.exports = PaymentMethodEnum;

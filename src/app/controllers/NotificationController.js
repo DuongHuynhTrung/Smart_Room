@@ -9,14 +9,14 @@ const User = require("../models/User");
  */
 const getAllNotificationsOfUser = asyncHandler(async (req, res) => {
   try {
-    const notifications = await Notification.find({ user_id: req.user.id });
+    const notifications = await Notification.find({ receiver_id: req.user.id });
 
-    if (!notifications || notifications.length === 0) {
+    if (!notifications) {
       res.status(404);
       throw new Error("No notifications found");
     }
 
-    res.status(200).json(notification);
+    res.status(200).json(notifications);
   } catch (error) {
     res
       .status(res.statusCode || 500)
@@ -31,7 +31,9 @@ const getAllNotificationsOfUser = asyncHandler(async (req, res) => {
  */
 const getNotificationById = asyncHandler(async (req, res) => {
   try {
-    const notification = await Notification.findById(req.params.id);
+    const notification = await Notification.findById(
+      req.params.notification_id
+    );
     if (!notification) {
       res.status(404);
       throw new Error("Notification not found");
@@ -46,108 +48,24 @@ const getNotificationById = asyncHandler(async (req, res) => {
 });
 
 /**
- * @desc Create a new notification
- * @route POST /api/notifications
- * @access Private
- */
-const createNotification = asyncHandler(async (req, res) => {
-  const { description, user_id, type } = req.body;
-
-  if (!description || !type || !user_id) {
-    res.status(400);
-    throw new Error("All fields are required");
-  }
-
-  const user = await User.findById(user_id);
-  if (!user) {
-    res.status(404);
-    throw new Error("User not found");
-  }
-
-  const newNotification = new Notification({
-    user_id,
-    description,
-    type,
-  });
-
-  try {
-    const createdNotification = await newNotification.save();
-    res.status(201).json(createdNotification);
-  } catch (error) {
-    res
-      .status(res.statusCode || 500)
-      .send(error.message || "Internal Server Error");
-  }
-});
-
-/**
- * @desc Update all notifications to 'read' for a user
- * @route PUT /api/notifications/:id
- * @access Private
- */
-const updateAllNotificationIsRead = asyncHandler(async (req, res) => {
-  try {
-    const notifications = await Notification.find({ user_id: req.user.id });
-    if (!notifications || notifications.length === 0) {
-      res.status(404);
-      throw new Error("User doesn't have notifications");
-    }
-
-    await Notification.updateMany(
-      { user_id: req.user.id },
-      { $set: { is_read: true } }
-    );
-
-    res.status(200).json(await this.getAllNotificationsOfUser(req, res));
-  } catch (error) {
-    res
-      .status(res.statusCode || 500)
-      .send(error.message || "Internal Server Error");
-  }
-});
-
-/**
- * @desc Update a single notification to 'read'
- * @route PUT /api/notifications/:id
- * @access Private
- */
-const updateNotificationIsRead = asyncHandler(async (req, res) => {
-  try {
-    const notification = await Notification.findById(req.params.id);
-    if (!notification) {
-      res.status(404);
-      throw new Error("Notification not found");
-    }
-
-    notification.is_read = true;
-    const updatedNotification = await notification.save();
-    res.status(200).json(updatedNotification);
-  } catch (error) {
-    res
-      .status(res.statusCode || 500)
-      .send(error.message || "Internal Server Error");
-  }
-});
-
-/**
  * @desc Update all notifications to 'seen' for a user
  * @route PUT /api/notifications/:id
  * @access Private
  */
 const updateAllNotificationIsSeen = asyncHandler(async (req, res) => {
   try {
-    const notifications = await Notification.find({ user_id: req.user.id });
+    const notifications = await Notification.find({ receiver_id: req.user.id });
     if (!notifications || notifications.length === 0) {
       res.status(404);
       throw new Error("User doesn't have notifications");
     }
 
     await Notification.updateMany(
-      { user_id: req.user.id },
+      { receiver_id: req.user.id },
       { $set: { is_new: false } }
     );
 
-    res.status(200).json(await Notification.find({ user_id: req.user.id }));
+    res.status(200).json(await Notification.find({ receiver_id: req.user.id }));
   } catch (error) {
     res
       .status(res.statusCode || 500)
@@ -162,7 +80,9 @@ const updateAllNotificationIsSeen = asyncHandler(async (req, res) => {
  */
 const updateNotificationIsSeen = asyncHandler(async (req, res) => {
   try {
-    const notification = await Notification.findById(req.params.id);
+    const notification = await Notification.findById(
+      req.params.notification_id
+    );
     if (!notification) {
       res.status(404);
       throw new Error("Notification not found");
@@ -183,15 +103,34 @@ const updateNotificationIsSeen = asyncHandler(async (req, res) => {
  * @route PUT /api/notifications/:id
  * @access Private
  */
-const deleteAllNotificationOfUser = asyncHandler(async (req, res) => {
+const deleteAllNotificationOfUserByAdmin = asyncHandler(async (req, res) => {
   try {
-    const notifications = await Notification.find({ user_id: req.user.id });
+    const { user_id } = req.params;
+    const notifications = await Notification.find({ receiver_id: user_id });
     if (!notifications || notifications.length === 0) {
       res.status(404);
       throw new Error("User doesn't have notifications");
     }
 
-    await Notification.deleteMany({ user_id: req.user.id });
+    await Notification.deleteMany({ receiver_id: user_id });
+
+    res.status(200).json({ message: "All Notification Deleted" });
+  } catch (error) {
+    res
+      .status(res.statusCode || 500)
+      .send(error.message || "Internal Server Error");
+  }
+});
+
+const deleteAllNotificationByAdmin = asyncHandler(async (req, res) => {
+  try {
+    const notifications = await Notification.find();
+    if (!notifications || notifications.length === 0) {
+      res.status(404);
+      throw new Error("User doesn't have notifications");
+    }
+
+    await Notification.deleteMany();
 
     res.status(200).json({ message: "All Notification Deleted" });
   } catch (error) {
@@ -206,17 +145,19 @@ const deleteAllNotificationOfUser = asyncHandler(async (req, res) => {
  * @route PUT /api/notifications/:id
  * @access Private
  */
-const deleteNotification = asyncHandler(async (req, res) => {
+const deleteNotificationByAdmin = asyncHandler(async (req, res) => {
   try {
-    const notification = await Notification.findById(req.params.id);
+    const notification = await Notification.findById(
+      req.params.notification_id
+    );
     if (!notification) {
       res.status(404);
       throw new Error("Notification not found");
     }
 
-    await Notification.findByIdAndDelete(req.params.id);
+    await Notification.findByIdAndDelete(req.params.notification_id);
 
-    await res.status(200).json({ message: "Notification Deleted" });
+    res.status(200).json({ message: "Notification Deleted" });
   } catch (error) {
     res
       .status(res.statusCode || 500)
@@ -227,11 +168,9 @@ const deleteNotification = asyncHandler(async (req, res) => {
 module.exports = {
   getAllNotificationsOfUser,
   getNotificationById,
-  createNotification,
-  updateAllNotificationIsRead,
-  updateNotificationIsRead,
   updateAllNotificationIsSeen,
   updateNotificationIsSeen,
-  deleteAllNotificationOfUser,
-  deleteNotification,
+  deleteAllNotificationOfUserByAdmin,
+  deleteNotificationByAdmin,
+  deleteAllNotificationByAdmin,
 };

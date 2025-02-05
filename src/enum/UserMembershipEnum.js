@@ -1,8 +1,8 @@
-const UserRankEnum = {
+const UserMembershipEnum = {
   NORMAL: "Normal",
   SILVER: "Silver",
   GOLD: "Gold",
   DIAMOND: "Diamond",
 };
 
-module.exports = UserRankEnum;
+module.exports = UserMembershipEnum;

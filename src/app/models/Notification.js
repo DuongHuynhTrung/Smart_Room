@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const notificationSchema = mongoose.Schema(
   {
-    user_id: {
+    receiver_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -12,16 +12,15 @@ const notificationSchema = mongoose.Schema(
       default: true,
       required: true,
     },
-    is_read: {
-      type: Boolean,
-      default: false,
-      required: true,
-    },
-    description: {
+    noti_describe: {
       type: String,
       required: true,
     },
-    type: {
+    noti_type: {
+      type: String,
+      required: true,
+    },
+    noti_title: {
       type: String,
       required: true,
     },

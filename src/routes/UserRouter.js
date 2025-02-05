@@ -16,6 +16,9 @@ const {
   unBanAccountByAdmin,
   deleteUsersNoAuth,
   updateUserInfoForAdmin,
+  forgotPassword,
+  resetPassword,
+  upMembershipByAccountBalance,
 } = require("../app/controllers/UserController");
 const {
   validateToken,
@@ -465,5 +468,11 @@ userRouter
 userRouter
   .route("/unBanAccountByAdmin/:account_id")
   .patch(validateTokenAdmin, unBanAccountByAdmin);
+
+userRouter.post("/forgotPassword/:email", forgotPassword);
+
+userRouter.post("/resetPassword", resetPassword);
+
+userRouter.post("/upMembershipByAccountBalance", upMembershipByAccountBalance);
 
 module.exports = userRouter;

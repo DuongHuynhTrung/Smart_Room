@@ -11,7 +11,7 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.1.2/socket.io.js"></script>
     <script>
-      const socket = io("https://everfresh-server.onrender.com", {
+      const socket = io("http://localhost:5000", {
         transports: ["websocket"], // Sử dụng WebSocket để tránh vấn đề CORS với polling
         upgrade: false, // Không nâng cấp từ polling
       });
@@ -26,7 +26,12 @@
       });
 
       // Listen for 'notifications-66f129c2ce17b4fe18136f52' messages from the server
-      socket.on("notifications-6709740e60eb9c5cc148d256", (data) => {
+      socket.on("new-noti-6797d4f34ee4675eb7791e13", (data) => {
+        console.log("Received notification from server:", data);
+      });
+
+      // Listen for 'notifications-66f129c2ce17b4fe18136f52' messages from the server
+      socket.on("user-info-6797d4f34ee4675eb7791e13", (data) => {
         console.log("Received notification from server:", data);
       });
 
