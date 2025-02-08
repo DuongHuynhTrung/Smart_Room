@@ -25,8 +25,8 @@ const createAddFundsPayOsUrl = asyncHandler(async (req, res) => {
       description: `${req.user?.email.split("@")[0] || "email"} ${
         TransactionTypeEnum.ADD_FUNDS
       }`,
-      cancelUrl: "https://smart-room-rental.vercel.app/account",
-      returnUrl: "https://smart-room-rental.vercel.app/account",
+      cancelUrl: "https://smart-room-rental.vercel.app/history",
+      returnUrl: "https://smart-room-rental.vercel.app/history",
     };
     const paymentLinkData = await payos.createPaymentLink(requestData);
     res.status(200).json({ paymentUrl: paymentLinkData.checkoutUrl });
