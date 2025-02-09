@@ -7,6 +7,7 @@ const PaymentMethodEnum = require("../../enum/PaymentMethodEnum");
 const TransactionTypeEnum = require("../../enum/TransactionTypeEnum");
 const NotificationTypeEnum = require("../../enum/NotificationTypeEnum");
 const Notification = require("../models/Notification");
+const UserMembershipEnum = require("../../enum/UserMembershipEnum");
 const payos = new PayOS(
   process.env.PAYOS_CLIENT_ID,
   process.env.PAYOS_API_KEY,
@@ -19,6 +20,7 @@ const createAddFundsPayOsUrl = asyncHandler(async (req, res) => {
       res.status(403);
       throw new Error("Chỉ có khách hàng có quyền thanh toán giao dịch");
     }
+
     const requestData = {
       orderCode: Date.now(),
       amount: req.body.amount,
@@ -43,12 +45,30 @@ const createUpMembershipPayOsUrl = asyncHandler(async (req, res) => {
       res.status(403);
       throw new Error("Chỉ có khách hàng có quyền thanh toán giao dịch");
     }
+    const membership = req.params.membership;
+    let description = "";
+    switch (membership) {
+      case UserMembershipEnum.SILVER: {
+        description = `${req.user?.email.split("@")[0] || "email"} 1`;
+        break;
+      }
+      case UserMembershipEnum.GOLD: {
+        description = `${req.user?.email.split("@")[0] || "email"} 2`;
+        break;
+      }
+      case UserMembershipEnum.DIAMOND: {
+        description = `${req.user?.email.split("@")[0] || "email"} 3`;
+        break;
+      }
+      default: {
+        res.status(400);
+        throw new Error("Gói thành viên không hợp lệ");
+      }
+    }
     const requestData = {
       orderCode: Date.now(),
       amount: req.body.amount,
-      description: `${req.user?.email.split("@")[0] || "email"} ${
-        req.params.membership
-      }`,
+      description: description,
       cancelUrl: "https://smart-room-rental.vercel.app/account",
       returnUrl: "https://smart-room-rental.vercel.app/account",
     };
@@ -99,7 +119,23 @@ const payOsCallBack = asyncHandler(async (req, res) => {
         _io.emit(`new-noti-${user._id}`, notification);
         _io.emit(`user-info-${user._id}`, user);
       } else {
-        user.membership = type;
+        switch (type) {
+          case "1": {
+            user.membership = UserMembershipEnum.SILVER;
+            break;
+          }
+          case "2": {
+            user.membership = UserMembershipEnum.GOLD;
+            break;
+          }
+          case "3": {
+            user.membership = UserMembershipEnum.DIAMOND;
+            break;
+          }
+          default: {
+            user.membership = type;
+          }
+        }
         await user.save();
 
         // create transaction
