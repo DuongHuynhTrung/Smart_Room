@@ -60,6 +60,7 @@ const historyRouter = require("./src/routes/HistoryRouter");
 const transactionRouter = require("./src/routes/TransactionRouter");
 const payOsRouter = require("./src/routes/PayOsRouter");
 const roomRouter = require("./src/routes/RoomRouter");
+const statisticRouter = require("./src/routes/StatisticRouter");
 
 app.use(express.static(path.resolve(__dirname, "public")));
 
@@ -72,6 +73,7 @@ app.use("/api/histories", historyRouter);
 app.use("/api/payOs", payOsRouter);
 app.use("/api/rooms", roomRouter);
 app.use("/api/transactions", transactionRouter);
+app.use("/api/statistics", statisticRouter);
 
 // Xử lý lỗi
 app.use(errorHandler);
