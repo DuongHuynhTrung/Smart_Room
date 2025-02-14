@@ -69,8 +69,6 @@ const statisticSales = asyncHandler(async (req, res) => {
         differencePercent: newUserDifferencePercent,
       },
     });
-
-    res.status(200).json(salesToday);
   } catch (error) {
     res
       .status(res.statusCode || 500)
