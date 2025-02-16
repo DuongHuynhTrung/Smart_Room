@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const Transaction = require("../models/Transaction");
 const User = require("../models/User");
+const RoleEnum = require("../../enum/RoleEnum");
 
 const statisticSales = asyncHandler(async (req, res) => {
   try {
@@ -42,10 +43,12 @@ const statisticSales = asyncHandler(async (req, res) => {
 
     const totalNewUserCurrent = await User.find({
       createdAt: { $gte: startOfPeriod, $lte: endOfPeriod },
+      role: RoleEnum.CUSTOMER,
     });
 
     const totalNewUserPrevious = await User.find({
       createdAt: { $gte: startOfPreviousPeriod, $lte: endOfPreviousPeriod },
+      role: RoleEnum.CUSTOMER,
     });
 
     const newUserDifferencePercent =
@@ -109,6 +112,7 @@ const statisticForMonthly = asyncHandler(async (req, res) => {
           $gte: new Date(`${year}-01-01`),
           $lt: new Date(`${year + 1}-01-01`),
         },
+        role: RoleEnum.CUSTOMER,
       },
     },
     {
