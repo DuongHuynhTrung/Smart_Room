@@ -9,6 +9,9 @@ const NotificationTypeEnum = require("../../enum/NotificationTypeEnum");
 const Notification = require("../models/Notification");
 const UserMembershipEnum = require("../../enum/UserMembershipEnum");
 const TempTransaction = require("../models/TempTransaction");
+const Room = require("../models/Room");
+const TempRoom = require("../models/TempRoom");
+const { RoomTypeEnum, RoomStatusEnum } = require("../../enum/RoomEnum");
 const payos = new PayOS(
   process.env.PAYOS_CLIENT_ID,
   process.env.PAYOS_API_KEY,
@@ -34,7 +37,7 @@ const createAddFundsPayOsUrl = asyncHandler(async (req, res) => {
     // Create temp Transaction
     const tempTransaction = new TempTransaction({
       orderCode: requestData.orderCode,
-      user_id: req.user._id,
+      user_id: req.user.id,
       type: TransactionTypeEnum.ADD_FUNDS,
     });
     await tempTransaction.save();
@@ -63,9 +66,48 @@ const createUpMembershipPayOsUrl = asyncHandler(async (req, res) => {
     const paymentLinkData = await payos.createPaymentLink(requestData);
     const tempTransaction = new TempTransaction({
       orderCode: requestData.orderCode,
-      user_id: req.user._id,
+      user_id: req.user.id,
       type: TransactionTypeEnum.UP_MEMBERSHIP,
       membership: membership,
+    });
+    await tempTransaction.save();
+    res.status(200).json({ paymentUrl: paymentLinkData.checkoutUrl });
+  } catch (error) {
+    res
+      .status(res.statusCode || 500)
+      .send(error.message || "Internal Server Error");
+  }
+});
+
+const createPostRoomPayOsUrl = asyncHandler(async (req, res) => {
+  try {
+    if (req.user.roleName !== RoleEnum.CUSTOMER) {
+      res.status(403);
+      throw new Error("Chỉ có khách hàng có quyền thanh toán đăng phòng");
+    }
+    const requestData = {
+      orderCode: Date.now(),
+      amount: req.body.amount,
+      description:
+        req.body.type === RoomTypeEnum.LOOKING_FOR_ROOMMATES
+          ? "Đăng tìm bạn ở ghép"
+          : "Đăng phòng cho thuê",
+      cancelUrl: "https://smart-room-rental.vercel.app/account",
+      returnUrl: "https://smart-room-rental.vercel.app/account",
+    };
+    const paymentLinkData = await payos.createPaymentLink(requestData);
+
+    const tempRoom = new TempRoom({
+      ...req.body,
+      user_id: req.user.id,
+      orderCode: requestData.orderCode,
+    });
+    await tempRoom.save();
+
+    const tempTransaction = new TempTransaction({
+      orderCode: requestData.orderCode,
+      user_id: req.user.id,
+      type: req.body.type,
     });
     await tempTransaction.save();
     res.status(200).json({ paymentUrl: paymentLinkData.checkoutUrl });
@@ -114,7 +156,7 @@ const payOsCallBack = asyncHandler(async (req, res) => {
 
         _io.emit(`new-noti-${user._id}`, notification);
         _io.emit(`user-info-${user._id}`, user);
-      } else {
+      } else if (tempTransaction.type == TransactionTypeEnum.UP_MEMBERSHIP) {
         user.membership = tempTransaction.membership;
         await user.save();
 
@@ -139,6 +181,39 @@ const payOsCallBack = asyncHandler(async (req, res) => {
 
         _io.emit(`new-noti-${user._id}`, notification);
         _io.emit(`user-info-${user._id}`, user);
+      } else {
+        const tempRoom = await TempRoom.findOne({ orderCode: orderCode });
+        const room = new Room({
+          ...tempRoom._doc,
+          status: RoomStatusEnum.UNDER_REVIEW,
+        });
+        await room.save();
+
+        // create transaction
+        const transaction = new Transaction({
+          user_id: user._id,
+          payment_method: PaymentMethodEnum.PayOS,
+          amount: amount,
+          transaction_type: tempTransaction.type,
+          transaction_code: orderCode,
+        });
+        await transaction.save();
+
+        // remove temp room
+        await tempRoom.remove();
+
+        // Create Notification
+        const admin = await User.findOne({ role: RoleEnum.ADMIN });
+        const notification = new Notification({
+          receiver_id: admin._id,
+          noti_describe:
+            "Bạn có một bài đăng phòng cần được kiểm duyệt trước khi công khai với mọi người",
+          noti_title: "Duyệt bài đăng phòng",
+          noti_type: NotificationTypeEnum.CENSOR_ROOM_POSTED,
+        });
+        await notification.save();
+
+        _io.emit(`new-noti-${admin._id}`, notification);
       }
 
       // Remove temp Transaction
@@ -169,5 +244,6 @@ const payOsCallBack = asyncHandler(async (req, res) => {
 module.exports = {
   createAddFundsPayOsUrl,
   createUpMembershipPayOsUrl,
+  createPostRoomPayOsUrl,
   payOsCallBack,
 };

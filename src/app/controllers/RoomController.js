@@ -10,10 +10,6 @@ const Notification = require("../models/Notification");
 const createRoom = asyncHandler(async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    if (!user) {
-      res.status(404);
-      throw new Error("User not found");
-    }
     if (user.membership === UserMembershipEnum.NORMAL) {
       res.status(400);
       throw new Error(
